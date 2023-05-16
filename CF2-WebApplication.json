@@ -1,0 +1,165 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "AWS CloudFormation Template that builds a Sample Web Application",
+  "Parameters" : {
+
+    "KeyName": {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+
+    "InstanceType" : {
+      "Description" : "WebServer EC2 instance type",
+      "Type" : "String",
+      "AllowedValues" : [ "t1.micro", "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "g2.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "AmiId" : {
+      "Description" : "AMI ID to use for instance",
+      "Type" : "String",
+      "ConstraintDescription" : "must be a valid AMI ID"
+    },
+
+    "SubnetId" : {
+      "Description" : "Subnet ID to use for instance",
+      "Type" : "String",
+      "ConstraintDescription" : "must be a valid Subnet ID"
+    },
+
+    "VpcId" : {
+      "Description" : "VPC ID to use for instance",
+      "Type" : "String",
+      "ConstraintDescription" : "must be a valid VPC ID"
+    },
+
+    "AllowedIp": {
+      "Description": "IP Address to allow HTTP access to in CIDR form, i.e. 10.10.10.10/32",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    }
+  },
+
+  "Resources" : {
+    "WebServerSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId": { "Ref": "VpcId" },
+        "GroupDescription" : "Enable HTTP access via port 80 locked down + SSH access",
+        "SecurityGroupIngress" : [
+          {"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : { "Ref" : "AllowedIp"}},
+          {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "AllowedIp"}}
+        ]
+      }
+    },
+    "LoadBalancer": {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Name" : "Load-balancer",
+        "Scheme" : "internal",
+        "SecurityGroups" : "sg-0324a9d47f87262a6",
+        "Subnets" : "subnet-0cf18c9ab0a0281c9"
+      }
+    },
+    "AlbTargetGroup": {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+
+      }
+    },
+
+    "WebServerLaunchConfig": {
+          "Type" : "AWS::AutoScaling::LaunchConfiguration",
+          "Properties" : {
+              "AssociatePublicIpAddress" : Boolean,
+              "BlockDeviceMappings" : [ BlockDeviceMapping, ... ],
+              "ClassicLinkVPCId" : String,
+              "ClassicLinkVPCSecurityGroups" : [ String, ... ],
+              "EbsOptimized" : Boolean,
+              "IamInstanceProfile" : String,
+              "ImageId" : String,
+              "InstanceId" : String,
+              "InstanceMonitoring" : Boolean,
+              "InstanceType" : String,
+              "KernelId" : String,
+              "KeyName" : String,
+              "LaunchConfigurationName" : String,
+              "MetadataOptions" : MetadataOptions,
+              "PlacementTenancy" : String,
+              "RamDiskId" : String,
+              "SecurityGroups" : [ String, ... ],
+              "SpotPrice" : String,
+              "UserData" : String
+            }
+    },
+
+    "WebServerAutoScaling": {
+        "Type" : "AWS::AutoScaling::AutoScalingGroup",
+        "Properties" : {
+            "AutoScalingGroupName" : String,
+            "AvailabilityZones" : [ String, ... ],
+            "CapacityRebalance" : Boolean,
+            "Context" : String,
+            "Cooldown" : String,
+            "DefaultInstanceWarmup" : Integer,
+            "DesiredCapacity" : String,
+            "DesiredCapacityType" : 3,
+            "HealthCheckGracePeriod" : Integer,
+            "HealthCheckType" : String,
+            "InstanceId" : String,
+            "LaunchConfigurationName" : String,
+            "LaunchTemplate" : LaunchTemplateSpecification,
+            "LifecycleHookSpecificationList" : [ LifecycleHookSpecification, ... ],
+            "LoadBalancerNames" : [ String, ... ],
+            "MaxInstanceLifetime" : Integer,
+            "MaxSize" : String,
+            "MetricsCollection" : [ MetricsCollection, ... ],
+            "MinSize" : String,
+            "MixedInstancesPolicy" : MixedInstancesPolicy,
+            "NewInstancesProtectedFromScaleIn" : Boolean,
+            "NotificationConfigurations" : [ NotificationConfiguration, ... ],
+            "PlacementGroup" : String,
+            "ServiceLinkedRoleARN" : String,
+            "Tags" : [ TagProperty, ... ],
+            "TargetGroupARNs" : [ String, ... ],
+            "TerminationPolicies" : [ String, ... ],
+            "VPCZoneIdentifier" : [ String, ... ]
+          }
+    },
+
+
+    "WebServer": {
+      "Type" : "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId" : { "Ref": "AmiId" },
+        "InstanceType"   : { "Ref" : "InstanceType" },
+        "KeyName"        : { "Ref" : "KeyName" },
+        "NetworkInterfaces": [ {
+          "AssociatePublicIpAddress": "true",
+          "DeviceIndex": "0",
+          "GroupSet": [ {"Ref" : "WebServerSecurityGroup"} ],
+          "SubnetId": { "Ref" : "SubnetId" }
+        } ],
+        "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
+                       "#!/bin/bash -xe\n",
+                       "yum update -y aws-cfn-bootstrap\n",
+                       "echo Hello World!\n"
+        ]]}}
+      },
+      "CreationPolicy" : {
+        "ResourceSignal" : {
+          "Timeout" : "PT15M"
+        }
+      }
+    }
+  },
+
+  "Outputs" : {
+
+  }
+}

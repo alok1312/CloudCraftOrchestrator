@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: deploy-webapp1
+spec:
+  template:
+    spec:
+      containers:
+      - name: web-container
+        image: alok131215/wordpress_app:2.0
+        env:
+          - name: DELETE
+            value: "True"
+        envFrom:
+          - configMapRef:
+              name: app-config
+          - secretRef:
+              name: app-secret
+        volumeMounts:
+        - name: app-volume
+          mountPath: /app/
+      restartPolicy: Never
+      volumes:
+      - name: app-volume
+        hostPath:
+          path: /Users/nikitarai/PycharmProjects/IntuitOnsite/
+  backoffLimit: 2
